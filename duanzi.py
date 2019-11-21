@@ -74,4 +74,3 @@ if __name__ == "__main__":
 
     t2 = Thread(target=porse)
     t2.start()
-    
