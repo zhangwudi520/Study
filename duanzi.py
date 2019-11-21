@@ -2,18 +2,23 @@
 import requests
 from lxml import etree
 from fake_useragent import UserAgent
+from threading import Thread, Lock
+import json
 import time
-from threading import Thread
+import logging
 
 
 url_list = ['https://www.xiaohua.com/duanzi?page=1']
 abandon_url = []
 
 
-def start_request(url):
+def start_request():
     global url_list
     ua = UserAgent()
     header = ua.chrome
+    mutex.acquire()
+    url = url_list[-1]
+    logging.info('The next url is {}'.format(url))
 
     text = requests.get(url=url, headers={"UserAgent": header}).text
     html = etree.HTML(text)
@@ -21,19 +26,30 @@ def start_request(url):
     next_url = html.xpath('//*[@id="Pager"]/a/@href')[-2]
 
     if next_url and next_url not in url_list:
-        url_list.append(next_url)
-        start_request(next_url)
-       
-    # return html
+        url_list.append("https://www.xiaohua.com" + next_url)
+        mutex.release()
+        start_request()
+    else:
+        mutex.release()
+        return 0
 
 
-def porse(url):
+def porse():
     # html = start_request(url)
     global url_list
     global abandon_url
 
     ua = UserAgent()
     header = ua.chrome
+    while len(url_list) == 1 and t1.isAlive():
+        logging.info('wait............')
+        time.sleep(0.1)
+    # 上锁
+    mutex.acquire()
+    url = url_list.pop(0)
+    mutex.release()
+
+    logging.info('The spider url is {}'.format(url))
 
     text = requests.get(url=url, headers={"UserAgent": header}).text
     html = etree.HTML(text)
@@ -52,25 +68,38 @@ def porse(url):
             "作者": author,
             "内容": context,
             "点赞": up_click,
-            "不行" : down_click,
+            "不行": down_click,
             "收藏": collect
         }
 
-        print(item)
-    if url_list != []:
-        url = url_list.pop(index=0)
-        abandon_url.append(url)
+        with open("duanzi.json", "a+", encoding="utf-8") as f:
+            f.write(json.dumps(item) + "\n")
 
-        porse(url)
+    if url_list != []:
+        abandon_url.append(url)
+        porse()
+    else:
+        return 0
 
 
 if __name__ == "__main__":
-    # 取出来用过的url列表
     """
     这样会有共享全局变量冲突的问题，导致全局变量数据不正确
     """
+    logging.basicConfig(
+        filename='app.log',
+        level=logging.INFO,
+        format='%(asctime)s %(filename)s[line:%(lineno)d] %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+        )
+    logging.info('Start Spider..')
+
+    mutex = Lock()
     t1 = Thread(target=start_request)
     t1.start()
 
     t2 = Thread(target=porse)
     t2.start()
+
+    # while t1.isAlive():
+    #     t2.join()
