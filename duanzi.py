@@ -45,6 +45,7 @@ def porse():
         logging.info('wait............')
         time.sleep(0.1)
     # 上锁
+    
     mutex.acquire()
     url = url_list.pop(0)
     mutex.release()
