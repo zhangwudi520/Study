@@ -56,10 +56,11 @@ def get_header():
     header = ua.random
     logging.info("write a header is [{}]".format(header))
     mutex.release()
-    if t1.isAlive():
+    if t2.isAlive():
         return get_header()
     else:
-        return
+        logging.info("def get_header() is stop.")
+        return 0
 
 
 @tail_call_optimized
@@ -79,7 +80,13 @@ def start_request():
 
     text = requests.get(url=url, headers={"UserAgent": header}).text
     html = etree.HTML(text)
+    is_next = html.xpath('//*[@id="Pager"]/a')[-2]
 
+    if is_next.xpath('./@href') == []:
+        thread_status = True
+        logging.info("def start_request() is stop.")
+        mutex.release()
+        return 0
     next_url = html.xpath('//*[@id="Pager"]/a/@href')[-2]
 
     if next_url and next_url not in url_list:
@@ -87,6 +94,7 @@ def start_request():
         mutex.release()
         return start_request()
     else:
+        logging.info("def start_request() is stop.")
         mutex.release()
         return 0
 
@@ -133,12 +141,13 @@ def parse():
         }
 
         with open("jokes.json", "a+", encoding="utf-8") as f:
-            f.write(json.dumps(item) + "\n")
+            f.write(json.dumps(item, ensure_ascii=False) + "\n")
 
     if url_list != []:
         abandon_url.append(url)
         return parse()
     else:
+        logging.info("def parse() is stop.")
         return 0
 
 
