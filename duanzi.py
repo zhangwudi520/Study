@@ -167,12 +167,15 @@ if __name__ == "__main__":
     cv = Condition()
     mutex = Lock()
     t1 = Thread(target=start_request)
+    logging.info("def start_request() is start.")
     t1.start()
 
     t2 = Thread(target=parse)
+    logging.info("def parse() is start.")
     t2.start()
 
     t3 = Thread(target=get_header)
+    logging.info("def get_header() is start.")
     t3.start()
 
     # while t1.isAlive():
