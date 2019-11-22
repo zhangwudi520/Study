@@ -43,7 +43,7 @@ def porse():
     header = ua.chrome
     while len(url_list) == 1 and t1.isAlive():
         logging.info('wait............')
-        time.sleep(0.5)
+        time.sleep(0.1)
     # 上锁
     mutex.acquire()
     url = url_list.pop(0)
