@@ -133,7 +133,7 @@ def parse():
         }
 
         with open("jokes.json", "a+", encoding="utf-8") as f:
-            f.write(json.dumps(item) + "\n")
+            f.write(json.dumps(item, ensure_ascii=False) + "\n")
 
     if url_list != []:
         abandon_url.append(url)
