@@ -1,22 +1,79 @@
 # conding: utf-8
-import requests
-from lxml import etree
-from fake_useragent import UserAgent
-from threading import Thread, Lock
 import json
-import time
 import logging
+import sys
+import time
+from threading import Lock, Thread, Condition
 
+import requests
+from fake_useragent import UserAgent
+from lxml import etree
 
+# 防止递归次数过多导致报错，但仅是更改了递归深度的阙值，没有从根本上解决问题
+# RecursionError: maximum recursion depth exceeded in comparison
+# sys.setrecursionlimit(99999999)
 url_list = ['https://www.xiaohua.com/duanzi?page=1']
 abandon_url = []
+ua = UserAgent()
+header = ua.random
+thread_status = True
 
 
+class TailRecurseException(BaseException):
+    """
+    自定义异常
+    """
+    def __init__(self, args, kwargs):
+        self.args = args
+        self.kwargs = kwargs
+
+
+def tail_call_optimized(g):
+    """
+    自定义装饰器，尾递归优化，当这个函数是其本身的祖父时，使它等于它自己，防止栈溢出。
+    但是效率约为之前的1/5左右。（不完全统计）
+    """
+    def func(*args, **kwargs):
+        f = sys._getframe()
+        if f.f_back and f.f_back.f_back and f.f_back.f_back.f_code == f.f_code:
+            raise TailRecurseException(args, kwargs)
+        else:
+            while True:
+                try:
+                    return g(*args, **kwargs)
+                except TailRecurseException as e:
+                    args = e.args
+                    kwargs = e.kwargs
+    func.__doc__ = g.__doc__
+    return func
+
+
+@tail_call_optimized
+def get_header():
+    global header
+    time.sleep(5)
+    mutex.acquire()
+    header = ua.random
+    logging.info("write a header is [{}]".format(header))
+    mutex.release()
+    if t1.isAlive():
+        return get_header()
+    else:
+        return
+
+
+@tail_call_optimized
 def start_request():
     global url_list
-    ua = UserAgent()
-    header = ua.chrome
+    global header
+    global thread_status
+
     mutex.acquire()
+    if len(url_list) == 2 and thread_status is False:
+        # t2.notify()
+        logging.info("Wake up the thread....")
+        thread_status = True
+        cv.notify()
     url = url_list[-1]
     logging.info('The next url is {}'.format(url))
 
@@ -28,24 +85,27 @@ def start_request():
     if next_url and next_url not in url_list:
         url_list.append("https://www.xiaohua.com" + next_url)
         mutex.release()
-        start_request()
+        return start_request()
     else:
         mutex.release()
         return 0
 
 
-def porse():
+@tail_call_optimized
+def parse():
     # html = start_request(url)
     global url_list
     global abandon_url
+    global header
+    global thread_status
 
-    ua = UserAgent()
-    header = ua.chrome
-    while len(url_list) == 1 and t1.isAlive():
-        logging.info('wait............')
-        time.sleep(0.1)
-    # 上锁
+    # 互斥锁
     mutex.acquire()
+    if len(url_list) == 1 and t1.isAlive():
+        logging.info('url_list is empty, please wait a minute...')
+        thread_status = False
+        # t2.wait()
+        cv.wait()
     url = url_list.pop(0)
     mutex.release()
 
@@ -72,19 +132,20 @@ def porse():
             "收藏": collect
         }
 
-        with open("duanzi.json", "a+", encoding="utf-8") as f:
+        with open("jokes.json", "a+", encoding="utf-8") as f:
             f.write(json.dumps(item) + "\n")
 
     if url_list != []:
         abandon_url.append(url)
-        porse()
+        return parse()
     else:
         return 0
 
 
 if __name__ == "__main__":
     """
-    这样会有共享全局变量冲突的问题，导致全局变量数据不正确
+    (这样会有共享全局变量冲突的问题，导致全局变量数据不正确)
+    使用互斥锁，不会出现问题
     """
     logging.basicConfig(
         filename='app.log',
@@ -94,12 +155,16 @@ if __name__ == "__main__":
         )
     logging.info('Start Spider..')
 
+    cv = Condition()
     mutex = Lock()
     t1 = Thread(target=start_request)
     t1.start()
 
-    t2 = Thread(target=porse)
+    t2 = Thread(target=parse)
     t2.start()
+
+    t3 = Thread(target=get_header)
+    t3.start()
 
     # while t1.isAlive():
     #     t2.join()
