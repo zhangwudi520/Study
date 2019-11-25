@@ -56,10 +56,11 @@ def get_header():
     header = ua.random
     logging.info("write a header is [{}]".format(header))
     mutex.release()
-    if t1.isAlive():
+    if t2.isAlive():
         return get_header()
     else:
-        return
+        logging.info("def get_header() is stop.")
+        return 0
 
 
 @tail_call_optimized
@@ -79,7 +80,13 @@ def start_request():
 
     text = requests.get(url=url, headers={"UserAgent": header}).text
     html = etree.HTML(text)
+    is_next = html.xpath('//*[@id="Pager"]/a')[-2]
 
+    if is_next.xpath('./@href') == []:
+        thread_status = True
+        logging.info("def start_request() is stop.")
+        mutex.release()
+        return 0
     next_url = html.xpath('//*[@id="Pager"]/a/@href')[-2]
 
     if next_url and next_url not in url_list:
@@ -87,6 +94,7 @@ def start_request():
         mutex.release()
         return start_request()
     else:
+        logging.info("def start_request() is stop.")
         mutex.release()
         return 0
 
@@ -139,6 +147,7 @@ def parse():
         abandon_url.append(url)
         return parse()
     else:
+        logging.info("def parse() is stop.")
         return 0
 
 
@@ -158,12 +167,15 @@ if __name__ == "__main__":
     cv = Condition()
     mutex = Lock()
     t1 = Thread(target=start_request)
+    logging.info("def start_request() is start.")
     t1.start()
 
     t2 = Thread(target=parse)
+    logging.info("def parse() is start.")
     t2.start()
 
     t3 = Thread(target=get_header)
+    logging.info("def get_header() is start.")
     t3.start()
 
     # while t1.isAlive():
