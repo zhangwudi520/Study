@@ -71,7 +71,6 @@ def start_request():
 
     mutex.acquire()
     if len(url_list) == 2 and thread_status is False:
-        # t2.notify()
         logging.info("Wake up the thread....")
         thread_status = True
         cv.notify()
@@ -101,7 +100,6 @@ def start_request():
 
 @tail_call_optimized
 def parse():
-    # html = start_request(url)
     global url_list
     global abandon_url
     global header
@@ -112,7 +110,7 @@ def parse():
     if len(url_list) == 1 and t1.isAlive():
         logging.info('url_list is empty, please wait a minute...')
         thread_status = False
-        # t2.wait()
+
         cv.wait()
     url = url_list.pop(0)
     mutex.release()
