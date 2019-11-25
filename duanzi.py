@@ -1,13 +1,14 @@
 # conding: utf-8
 import json
 import logging
-import sys
 import time
-from threading import Lock, Thread, Condition
+from threading import Condition, Lock, Thread
 
 import requests
 from fake_useragent import UserAgent
 from lxml import etree
+
+from tail_call import *
 
 # 防止递归次数过多导致报错，但仅是更改了递归深度的阙值，没有从根本上解决问题
 # RecursionError: maximum recursion depth exceeded in comparison
@@ -17,35 +18,6 @@ abandon_url = []
 ua = UserAgent()
 header = ua.random
 thread_status = True
-
-
-class TailRecurseException(BaseException):
-    """
-    自定义异常
-    """
-    def __init__(self, args, kwargs):
-        self.args = args
-        self.kwargs = kwargs
-
-
-def tail_call_optimized(g):
-    """
-    自定义装饰器，尾递归优化，当这个函数是其本身的祖父时，使它等于它自己，防止栈溢出。
-    但是效率约为之前的1/5左右。（不完全统计）
-    """
-    def func(*args, **kwargs):
-        f = sys._getframe()
-        if f.f_back and f.f_back.f_back and f.f_back.f_back.f_code == f.f_code:
-            raise TailRecurseException(args, kwargs)
-        else:
-            while True:
-                try:
-                    return g(*args, **kwargs)
-                except TailRecurseException as e:
-                    args = e.args
-                    kwargs = e.kwargs
-    func.__doc__ = g.__doc__
-    return func
 
 
 @tail_call_optimized
