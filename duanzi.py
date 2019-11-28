@@ -8,7 +8,8 @@ import requests
 from fake_useragent import UserAgent
 from lxml import etree
 
-from tail_call import *
+# from tail_call import *
+from tail_call import tail_call_optimized
 
 # 防止递归次数过多导致报错，但仅是更改了递归深度的阙值，没有从根本上解决问题
 # RecursionError: maximum recursion depth exceeded in comparison
