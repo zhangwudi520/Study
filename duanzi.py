@@ -93,7 +93,8 @@ def parse():
     text = requests.get(url=url, headers={"UserAgent": header}).text
     html = etree.HTML(text)
 
-    div = html.xpath('/html/body/div/div[8]/div[2]/div[2]/div[@class="one-cont"]')
+    div = html.xpath(
+        '/html/body/div/div[8]/div[2]/div[2]/div[@class="one-cont"]')
 
     for d in div:
         item = {}
@@ -132,7 +133,7 @@ if __name__ == "__main__":
         level=logging.INFO,
         format='%(asctime)s %(filename)s[line:%(lineno)d] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
-        )
+    )
     logging.info('Start Spider..')
 
     cv = Condition()
