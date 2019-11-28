@@ -23,6 +23,9 @@ thread_status = True
 
 @tail_call_optimized
 def get_header():
+    """
+    递归每隔5秒获得一次header
+    """
     global header
     time.sleep(5)
     mutex.acquire()
@@ -38,6 +41,9 @@ def get_header():
 
 @tail_call_optimized
 def start_request():
+    """
+    递归依次获取下一页的链接，并存入列表
+    """
     global url_list
     global header
     global thread_status
@@ -73,6 +79,9 @@ def start_request():
 
 @tail_call_optimized
 def parse():
+    """
+    递归：页面数据处理，获得段子信息
+    """
     global url_list
     global abandon_url
     global header
@@ -127,6 +136,8 @@ if __name__ == "__main__":
     """
     (这样会有共享全局变量冲突的问题，导致全局变量数据不正确)
     使用互斥锁，不会出现问题
+    上述问题已解决。
+    优化多线程：
     """
     logging.basicConfig(
         filename='app.log',
