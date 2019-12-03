@@ -12,6 +12,13 @@ def create_app():
     # 加载配置
     app.config.from_object(envs.get('develop'))
 
+    # @app.errorhandler(404)
+    # def page_not_found(error):
+    #     """
+    #     捕获全局404异常
+    #     """
+    #     return "xxx"
+
     init_ext(app)
     init_view(app)
     # 隐匿函数调用蓝图

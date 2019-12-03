@@ -21,6 +21,8 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    SECRET_KEY = "zhangwudi2019"
+
 
 class DevelopConfig(Config):
     """
