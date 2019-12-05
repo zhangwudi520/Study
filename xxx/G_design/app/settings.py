@@ -22,6 +22,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     SECRET_KEY = "zhangwudi2019"
+    SESSION_TYPE = "redis"
 
 
 class DevelopConfig(Config):
@@ -32,7 +33,7 @@ class DevelopConfig(Config):
 
     db_info = {
         "ENGINE": "mysql",
-        "DRIVER": "pymysql",
+        "DRIVER": "mysqlconnector",
         "USER": "root",
         "PASSWD": "123456",
         "HOST": "localhost",

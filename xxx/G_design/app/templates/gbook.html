@@ -1,0 +1,90 @@
+{% load staticfiles %}
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>首页_个人博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../static/css/base.css" rel="stylesheet">
+  <link href="../static/css/index.css" rel="stylesheet">
+  <link href="../static/css/m.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="../static/images/favicon.ico">
+  <!--[if lt IE 9]>
+  <script src="../static/js/modernizr.js"></script>
+  <![endif]-->
+  <script>
+    window.onload = function () {
+      var oH2 = document.getElementsByTagName("h2")[0];
+      var oUl = document.getElementsByTagName("ul")[0];
+      oH2.onclick = function () {
+        var style = oUl.style;
+        style.display = style.display == "block" ? "none" : "block";
+        oH2.className = style.display == "block" ? "open" : ""
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <header>
+    <div class="tophead">
+      <div class="logo"><a href="{% url 'home' %}">XX个人博客</a></div>
+      <div id="mnav">
+        <h2><span class="navicon"></span></h2>
+        <ul>
+          <li><a href="{% url 'home' %}">网站首页</a></li>
+          <li><a href="{% url 'about' %}">关于我</a></li>
+          <li><a href="{% url 'share' %}">模板分享</a></li>
+          <li><a href="{% url 'blog' %}">学无止境</a></li>
+          <li><a href="#">留言</a></li>
+        </ul>
+      </div>
+      <nav class="topnav" id="topnav">
+        <ul>
+          <li><a href="{% url 'home' %}">网站首页</a></li>
+          <li><a href="{% url 'about' %}">关于我</a></li>
+          <li><a href="{% url 'share' %}">模板分享</a></li>
+          <li><a href="{% url 'blog' %}">学无止境</a></li>
+          <li><a href="#">留言</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <article>
+    <h1 class="t_nav"><span>像“草根”一样，紧贴着地面，低调的存在，冬去春来，枯荣无恙。</span><a href="/" class="n1">网站首页</a><a href="/"
+        class="n2">留言</a>
+    </h1>
+    <div class="ab_box">
+      <div class="leftbox">
+        <div class="newsview">
+          <div class="news_infos"> 此处安装插件</div>
+        </div>
+      </div>
+      <div class="rightbox">
+        <div class="aboutme">
+          <h2 class="hometitle">关于我</h2>
+          <div class="avatar"><img src="../static/images/avatar.jpg"></div>
+          <div class="ab_con">
+            <p>网名：dancesmile | 杨青</p>
+            <p>职业：Web前端设计师、网页设计 </p>
+            <p>个人微信：yangqq_1987</p>
+            <p>邮箱：dancesmiling@qq.com</p>
+          </div>
+        </div>
+        <div class="weixin">
+          <h2 class="hometitle">微信关注</h2>
+          <ul>
+            <img src="../static/images/wx.jpg">
+          </ul>
+        </div>
+      </div>
+    </div>
+  </article>
+  <footer>
+    <p>Design by <a href="/">杨青个人博客</a> <a href="/">蜀ICP备11002373号-1</a></p>
+  </footer>
+  <script src="../static/js/nav.js"></script>
+</body>
+
+</html>

@@ -11,7 +11,6 @@ def create_app():
     # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:123456@localhost:3306/G_design"
     # 加载配置
     app.config.from_object(envs.get('develop'))
-
     # @app.errorhandler(404)
     # def page_not_found(error):
     #     """

@@ -1,20 +1,43 @@
-from flask import Blueprint, jsonify, redirect, request, abort, render_template, Response, session
+from flask import (Blueprint, Response, abort, jsonify, redirect,
+                   render_template, request, session)
+from sqlalchemy.exc import IntegrityError
+
+from ..models import User, db
 
 ub = Blueprint('ub', __name__)
 
 
 @ub.route('/')
 def home():
-    return "Flask Success"
+    return render_template('bootstrap_demo/base.html')
 
 
 @ub.route('/register/', methods=['POST'])
 def register():
-    data = {
-        "username": "xxxx",
-        "pwd": "aaaaaa"
-    }
-    return jsonify(msg="OK", data=data)
+    data = request.get_json()
+    username = data.get('username', '')
+    password = data.get('password', '')
+    name = data.get('name', '')
+    if not all([name, username, password]):
+        return jsonify(msg="参数不全", code=4004)
+    try:
+        user = User(name=name, user=username)
+        user.password = password
+        db.session.add(user)
+        db.session.commit()
+
+        return jsonify(msg="OK", code=2000)
+    except IntegrityError as e:
+        # 数据库操作错误后的回滚
+        db.session.rollback()
+        # 表示账号出现了重复值，即账号已注册过
+        # current_app.logger.error(e)
+        return jsonify(msg="帐号已存在。", code=4005)
+    except Exception as e:
+        # 数据库操作错误后的回滚
+        db.session.rollback()
+        # current_app.logger.error(e)
+        return jsonify(msg="Error", code=4000)
 
 
 @ub.route('/login/', methods=['POST', 'GET'])
@@ -41,29 +64,6 @@ def mine():
     user = session.get('user')
 
     return "{}".format(user)
-
-
-# 每个views视图都可以添加多个路由
-@ub.route('/test/<int:id>/')
-@ub.route('/test1/<string:id>/')
-def tt(id):
-    print(id)
-    print(type(id))
-
-    return "{}".format(id)
-
-
-@ub.route('/redirect/')
-def red():
-    """[summary]
-
-    Returns:
-        [type] -- [description]
-    """
-    # 重定向
-    # return redirect('/')
-    # 反向解析
-    return redirect(url_for("ub.home"))
 
 
 @ub.route('/sendrequest/', methods=['GET', 'POST'])

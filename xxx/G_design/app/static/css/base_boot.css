@@ -1,0 +1,12 @@
+nav {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+body {
+    padding-top: 50px;
+}
+
+ol.breadcrumb {
+    padding-left: 30px;
+}
