@@ -3,7 +3,6 @@ from flask import Flask
 from .ext import init_ext
 from .settings import envs
 from .views import init_view
-from .models import User
 
 
 def create_app():

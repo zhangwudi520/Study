@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 
 from ..models import User, db
 
-ub = Blueprint('ub', __name__)
+ub = Blueprint('ub', __name__, url_prefix='/user')
 
 
 @ub.route('/')
